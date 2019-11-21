@@ -21,6 +21,8 @@ type Config struct {
 	partition int
 	offset int64
 	messageCount int64
+
+	detail bool
 }
 
 func main() {
@@ -33,6 +35,7 @@ func main() {
 	flag.IntVar(&c.partition, "partition", 0, "")
 	flag.Int64Var(&c.offset, "offset", 0, "")
 	flag.Int64Var(&c.messageCount, "max-messages", 1, "")
+	flag.BoolVar(&c.detail, "detail", false, "output message content")
 	flag.Parse()
 
 	switch strings.ToLower(clientType) {
@@ -77,9 +80,13 @@ func saramaConsumer(config *Config) {
 	for {
 		select {
 		case m := <- pc.Messages():
-			fmt.Printf("get message at: offset: %d, valueLen: %d, keyLen: %d\n", m.Offset, len(m.Value), len(m.Key))
 			maxCnt ++
             totalValueLen += len(m.Value)
+            if config.detail {
+            	fmt.Println(m.Value)
+			} else {
+				fmt.Printf("get message at: offset: %d, valueLen: %d, keyLen: %d\n", m.Offset, len(m.Value), len(m.Key))
+			}
 			if maxCnt >= config.messageCount {
                 fmt.Printf("%d messages from offset:%d, total size is %d\n", maxCnt, config.offset, totalValueLen)
 				return
@@ -118,8 +125,12 @@ func kafkaGo(config *Config) {
 			fmt.Println("met error:", err)
 			break
 		}
-		fmt.Printf("message at offset %d: keyLen: %d, valueLen: %d\n", m.Offset, len(m.Key), len(m.Value))
-        totalValueLen += len(m.Value)
+		if config.detail {
+			fmt.Println(m.Value)
+		} else {
+			fmt.Printf("message at offset %d: keyLen: %d, valueLen: %d\n", m.Offset, len(m.Key), len(m.Value))
+		}
+		totalValueLen += len(m.Value)
 		maxCnt ++
 		if maxCnt >= config.messageCount {
             fmt.Printf("%d messages from offset:%d, total size is %d\n", maxCnt, config.offset, totalValueLen)
