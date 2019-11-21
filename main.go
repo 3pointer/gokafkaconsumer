@@ -32,7 +32,7 @@ func main() {
 	flag.StringVar(&c.topic, "topic", "", "")
 	flag.IntVar(&c.partition, "partition", 0, "")
 	flag.Int64Var(&c.offset, "offset", 0, "")
-	flag.Int64Var(&c.messageCount, "max-message", 0, "")
+	flag.Int64Var(&c.messageCount, "max-messages", 1, "")
 	flag.Parse()
 
 	switch strings.ToLower(clientType) {
@@ -125,7 +125,7 @@ func kafkaGo(config *Config) {
         totalValueLen += len(m.Value)
 		maxCnt ++
 		if maxCnt >= config.messageCount {
-            fmt.Printf("%d messages from offset:%d, total size is %d", maxCnt, config.offset, totalValueLen)
+            fmt.Printf("%d messages from offset:%d, total size is %d\n", maxCnt, config.offset, totalValueLen)
 			return
 		}
 	}
