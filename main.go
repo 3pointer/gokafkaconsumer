@@ -97,7 +97,6 @@ func saramaConsumer(config *Config) {
 }
 
 func kafkaGo(config *Config) {
-	// make a new reader that consumes from topic-A, partition 0, at offset 42
 	r := kafka2.NewReader(kafka2.ReaderConfig{
 		Brokers:   []string{config.addr},
 		Topic:     config.topic,
