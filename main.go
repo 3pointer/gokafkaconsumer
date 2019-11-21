@@ -11,6 +11,10 @@ import (
 	kafka2 "github.com/segmentio/kafka-go"
 )
 
+const (
+    defaultWaitTimeout = 10 * time.Minute
+)
+
 type Config struct {
 	addr string
 	topic string
@@ -69,19 +73,22 @@ func saramaConsumer(config *Config) {
 	}
 
 	maxCnt := int64(0)
+    totalValueLen := 0
 	for {
 		select {
 		case m := <- pc.Messages():
-			fmt.Println(fmt.Sprintf("get message at: offset: %d, valueLen: %d, keyLen: %d", m.Offset, len(m.Value), len(m.Key)))
+			fmt.Printf("get message at: offset: %d, valueLen: %d, keyLen: %d\n", m.Offset, len(m.Value), len(m.Key))
 			maxCnt ++
+            totalValueLen += len(m.Value)
 			if maxCnt >= config.messageCount {
+                fmt.Printf("%d messages from offset:%d, total size is %d", maxCnt, config.offset, totalValueLen)
 				return
 			}
 		case m := <- pc.Errors():
 			fmt.Println("met error:", m)
 			time.Sleep(time.Second)
 			continue
-		case <-time.After(11 * time.Minute):
+		case <-time.After(defaultWaitTimeout):
 			fmt.Println("timeout")
 			return
 		}
@@ -95,22 +102,31 @@ func kafkaGo(config *Config) {
 		Brokers:   []string{config.addr},
 		Topic:     config.topic,
 		Partition: config.partition,
-		MinBytes:  10e3, // 10KBJ
-		MaxBytes:  10e6, // 1GB
+		MinBytes:  10e3, // 10KB
+		MaxBytes:  10e6, // 1MB
 	})
 	r.SetOffset(config.offset)
 
+    ctx, err := context.WithTimeout(context.Background(), defaultWaitTimeout)
+    if err != nil {
+        fmt.Println("c")
+        return
+    }
+
 	fmt.Println("read message from", config.offset)
 	maxCnt := int64(0)
+    totalValueLen := 0
 	for {
-		m, err := r.ReadMessage(context.Background())
+		m, err := r.ReadMessage(ctx)
 		if err != nil {
 			fmt.Println("met error:", err)
 			break
 		}
 		fmt.Printf("message at offset %d: keyLen: %d, valueLen: %d\n", m.Offset, len(m.Key), len(m.Value))
+        totalValueLen += len(m.Value)
 		maxCnt ++
 		if maxCnt >= config.messageCount {
+            fmt.Printf("%d messages from offset:%d, total size is %d", maxCnt, config.offset, totalValueLen)
 			return
 		}
 	}
