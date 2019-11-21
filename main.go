@@ -83,7 +83,7 @@ func saramaConsumer(config *Config) {
 			maxCnt ++
             totalValueLen += len(m.Value)
             if config.detail {
-            	fmt.Println(m.Value)
+            	fmt.Println(string(m.Value))
 			} else {
 				fmt.Printf("get message at: offset: %d, valueLen: %d, keyLen: %d\n", m.Offset, len(m.Value), len(m.Key))
 			}
@@ -126,7 +126,7 @@ func kafkaGo(config *Config) {
 			break
 		}
 		if config.detail {
-			fmt.Println(m.Value)
+			fmt.Println(string(m.Value))
 		} else {
 			fmt.Printf("message at offset %d: keyLen: %d, valueLen: %d\n", m.Offset, len(m.Key), len(m.Value))
 		}
