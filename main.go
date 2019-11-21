@@ -106,11 +106,8 @@ func kafkaGo(config *Config) {
 	})
 	r.SetOffset(config.offset)
 
-    ctx, err := context.WithTimeout(context.Background(), defaultWaitTimeout)
-    if err != nil {
-        fmt.Println("c")
-        return
-    }
+    ctx, cancel := context.WithTimeout(context.Background(), defaultWaitTimeout)
+    defer cancel()
 
 	fmt.Println("read message from", config.offset)
 	maxCnt := int64(0)
