@@ -12,7 +12,7 @@ import (
 )
 
 const (
-    defaultWaitTimeout = 10 * time.Minute
+	defaultWaitTimeout = 10 * time.Minute
 )
 
 type Config struct {
@@ -76,19 +76,19 @@ func saramaConsumer(config *Config) {
 	}
 
 	maxCnt := int64(0)
-    totalValueLen := 0
+	totalValueLen := 0
 	for {
 		select {
 		case m := <- pc.Messages():
 			maxCnt ++
-            totalValueLen += len(m.Value)
-            if config.detail {
-            	fmt.Println(string(m.Value))
+			totalValueLen += len(m.Value)
+			if config.detail {
+				fmt.Println(string(m.Value))
 			} else {
 				fmt.Printf("get message at: offset: %d, valueLen: %d, keyLen: %d\n", m.Offset, len(m.Value), len(m.Key))
 			}
 			if maxCnt >= config.messageCount {
-                fmt.Printf("%d messages from offset:%d, total size is %d\n", maxCnt, config.offset, totalValueLen)
+				fmt.Printf("%d messages from offset:%d, total size is %d\n", maxCnt, config.offset, totalValueLen)
 				return
 			}
 		case m := <- pc.Errors():
@@ -113,12 +113,12 @@ func kafkaGo(config *Config) {
 	})
 	r.SetOffset(config.offset)
 
-    ctx, cancel := context.WithTimeout(context.Background(), defaultWaitTimeout)
-    defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), defaultWaitTimeout)
+	defer cancel()
 
 	fmt.Println("read message from", config.offset)
 	maxCnt := int64(0)
-    totalValueLen := 0
+	totalValueLen := 0
 	for {
 		m, err := r.ReadMessage(ctx)
 		if err != nil {
@@ -133,7 +133,7 @@ func kafkaGo(config *Config) {
 		totalValueLen += len(m.Value)
 		maxCnt ++
 		if maxCnt >= config.messageCount {
-            fmt.Printf("%d messages from offset:%d, total size is %d\n", maxCnt, config.offset, totalValueLen)
+			fmt.Printf("%d messages from offset:%d, total size is %d\n", maxCnt, config.offset, totalValueLen)
 			return
 		}
 	}
