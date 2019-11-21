@@ -81,7 +81,7 @@ func saramaConsumer(config *Config) {
 			maxCnt ++
             totalValueLen += len(m.Value)
 			if maxCnt >= config.messageCount {
-                fmt.Printf("%d messages from offset:%d, total size is %d", maxCnt, config.offset, totalValueLen)
+                fmt.Printf("%d messages from offset:%d, total size is %d\n", maxCnt, config.offset, totalValueLen)
 				return
 			}
 		case m := <- pc.Errors():
