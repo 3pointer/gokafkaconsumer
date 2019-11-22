@@ -50,7 +50,7 @@ func main() {
 		fmt.Println("choose kafka-go to consumer")
 		kafkaGo(c)
 	default:
-		fmt.Println("wront client type for:", clientType, "only support sarama/kafkago")
+		fmt.Println("wrong client type for:", clientType, "only support sarama/kafkago")
 	}
 }
 
