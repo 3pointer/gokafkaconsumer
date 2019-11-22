@@ -36,6 +36,7 @@ func main() {
 	flag.StringVar(&c.addr, "addr", "localhost:9092", "")
 	flag.StringVar(&c.topic, "topic", "", "")
 	flag.IntVar(&c.partition, "partition", 0, "")
+	flag.IntVar(&c.ignoreValueLen, "ignore", 0, "ignore message less than this value")
 	flag.Int64Var(&c.offset, "offset", 0, "")
 	flag.Int64Var(&c.messageCount, "max-messages", 1, "")
 	flag.BoolVar(&c.detail, "detail", false, "output message content")
