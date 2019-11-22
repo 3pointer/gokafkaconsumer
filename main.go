@@ -23,6 +23,9 @@ type Config struct {
 	messageCount int64
 
 	detail bool
+
+	// ignore length of value less than `ignoreValueLen`
+	ignoreValueLen int
 }
 
 func main() {
@@ -77,9 +80,15 @@ func saramaConsumer(config *Config) {
 
 	maxCnt := int64(0)
 	totalValueLen := 0
+	ignoreCnt := 0
+	maxValueLen := 0
 	for {
 		select {
 		case m := <- pc.Messages():
+			if len(m.Value) < config.ignoreValueLen {
+				ignoreCnt ++
+				continue
+			}
 			maxCnt ++
 			totalValueLen += len(m.Value)
 			if config.detail {
@@ -87,8 +96,12 @@ func saramaConsumer(config *Config) {
 			} else {
 				fmt.Printf("sarama get message at offset: %d, valueLen: %d, keyLen: %d\n", m.Offset, len(m.Value), len(m.Key))
 			}
+			if maxValueLen < len(m.Value) {
+				maxValueLen = len(m.Value)
+			}
 			if maxCnt >= config.messageCount {
-				fmt.Printf("%d messages from offset:%d, total size is %d\n", maxCnt, config.offset, totalValueLen)
+				fmt.Printf("%d messages from offset %d, ignore %d message, rest messages max size is %d, total size is %d\n",
+					maxCnt, config.offset, ignoreCnt, maxValueLen, totalValueLen)
 				return
 			}
 		case m := <- pc.Errors():
@@ -117,22 +130,32 @@ func kafkaGo(config *Config) {
 	defer cancel()
 
 	maxCnt := int64(0)
+	ignoreCnt := 0
 	totalValueLen := 0
+	maxValueLen := 0
 	for {
 		m, err := r.ReadMessage(ctx)
 		if err != nil {
 			fmt.Println("met error:", err)
 			break
 		}
+		if len(m.Value) < config.ignoreValueLen {
+			ignoreCnt ++
+			continue
+		}
 		if config.detail {
 			fmt.Println(string(m.Value))
 		} else {
 			fmt.Printf("kafkago get message at offset %d: keyLen: %d, valueLen: %d\n", m.Offset, len(m.Key), len(m.Value))
 		}
+		if len(m.Value) > maxValueLen {
+			maxValueLen = len(m.Value)
+		}
 		totalValueLen += len(m.Value)
 		maxCnt ++
 		if maxCnt >= config.messageCount {
-			fmt.Printf("%d messages from offset:%d, total size is %d\n", maxCnt, config.offset, totalValueLen)
+			fmt.Printf("%d messages from offset %d, ignore %d message, rest messages max size is %d, total size is %d\n",
+				maxCnt, config.offset, ignoreCnt, maxValueLen, totalValueLen)
 			return
 		}
 	}
