@@ -85,7 +85,7 @@ func saramaConsumer(config *Config) {
 			if config.detail {
 				fmt.Println(string(m.Value))
 			} else {
-				fmt.Printf("get message at: offset: %d, valueLen: %d, keyLen: %d\n", m.Offset, len(m.Value), len(m.Key))
+				fmt.Printf("sarama get message at offset: %d, valueLen: %d, keyLen: %d\n", m.Offset, len(m.Value), len(m.Key))
 			}
 			if maxCnt >= config.messageCount {
 				fmt.Printf("%d messages from offset:%d, total size is %d\n", maxCnt, config.offset, totalValueLen)
@@ -116,7 +116,6 @@ func kafkaGo(config *Config) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultWaitTimeout)
 	defer cancel()
 
-	fmt.Println("read message from", config.offset)
 	maxCnt := int64(0)
 	totalValueLen := 0
 	for {
@@ -128,7 +127,7 @@ func kafkaGo(config *Config) {
 		if config.detail {
 			fmt.Println(string(m.Value))
 		} else {
-			fmt.Printf("message at offset %d: keyLen: %d, valueLen: %d\n", m.Offset, len(m.Key), len(m.Value))
+			fmt.Printf("kafkago get message at offset %d: keyLen: %d, valueLen: %d\n", m.Offset, len(m.Key), len(m.Value))
 		}
 		totalValueLen += len(m.Value)
 		maxCnt ++
