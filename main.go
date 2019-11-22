@@ -118,8 +118,9 @@ func saramaConsumer(config *Config) {
 }
 
 func kafkaGo(config *Config) {
+
 	r := kafka2.NewReader(kafka2.ReaderConfig{
-		Brokers:   []string{config.addr},
+		Brokers:   strings.Split(config.addr, ","),
 		Topic:     config.topic,
 		Partition: config.partition,
 		MinBytes:  10e3, // 10KB
